@@ -1,68 +1,64 @@
 const { test, expect } = require('@playwright/test');
+const testData = require('../data/data.json');
 
-// Load the JSON data
-const testData = require('../data/data.json'); // Adjust this path if needed
+const GAME_URL = 'https://dutch-english-phrase-game.netlify.app/';
 
-test.describe('Dutch-English Phrase Game Automation', () => {
-  test('Verify the game flow', async ({ page }) => {
-    // Navigate to the game
-    await page.goto('https://dutch-english-phrase-game.netlify.app/');
+/**
+ * The app may show e.g. `Translate this phrase: "…"` or
+ * `Pick the correct English translation` plus a quoted Dutch line.
+ * @param {string} rawQuestion
+ */
+function dutchPhraseFromQuestion(rawQuestion) {
+  const match = rawQuestion.match(/"([^"]+)"/);
+  if (!match) {
+    throw new Error(`No quoted Dutch phrase in question: ${JSON.stringify(rawQuestion.trim())}`);
+  }
+  return match[1].trim();
+}
 
-    // Enter the player's name
-    const nameInput = page.locator('#name');
-    const enterButton = page.locator('#enter-btn');
+/** @param {{ dutch: string | string[], english: string }} entry @param {string} phrase */
+function entryMatchesDutch(entry, phrase) {
+  if (Array.isArray(entry.dutch)) {
+    return entry.dutch.some((d) => d.trim() === phrase);
+  }
+  return entry.dutch.trim() === phrase;
+}
 
-    await nameInput.fill('Test Player'); // Replace with any test name
-    await enterButton.click();
+/** @param {string} dutchPhrase */
+function englishForPhrase(dutchPhrase) {
+  const match = testData.phrases.find((p) => entryMatchesDutch(p, dutchPhrase));
+  if (!match) {
+    throw new Error(`No matching phrase in data for: ${JSON.stringify(dutchPhrase)}`);
+  }
+  return match.english;
+}
 
-    // Verify that the Start button is visible
+test.describe('Dutch-English Phrase Game', () => {
+  test('enters name, answers first question, advances', async ({ page }) => {
+    await page.goto(GAME_URL);
+
+    await page.locator('#name').fill('Test Player');
+    await page.locator('#enter-btn').click();
+
     const startButton = page.locator('#start-btn');
     await expect(startButton).toBeVisible();
-    console.log('Entered name and verified Start button is visible.');
-
-    // Start the game
     await startButton.click();
 
-    // Verify the Game UI is displayed
-    const gameDiv = page.locator('.game');
-    await expect(gameDiv).toBeVisible();
-    console.log('Game started, and game UI is visible.');
+    await expect(page.locator('.game')).toBeVisible();
 
-    // Get the first question
-    const question = (await page.locator('.question').textContent()).trim();
-    console.log(`Question displayed: ${question}`);
+    const questionLocator = page.locator('.question');
+    const question = (await questionLocator.textContent()).trim();
+    const dutchPhrase = dutchPhraseFromQuestion(question);
+    const correctAnswer = englishForPhrase(dutchPhrase);
 
-    // Extract the Dutch phrase from the question and find the correct answer
-    const currentPhrase = question.replace('Translate this phrase: "', '').replace('"', '').trim();
-    const correctAnswer = testData.phrases.find(p => p.dutch.trim() === currentPhrase)?.english;
+    await page.locator(`.choices button:has-text("${correctAnswer}")`).click();
 
-    if (!correctAnswer) {
-      throw new Error(`No matching phrase found for the question: "${currentPhrase}"`);
-    }
-    console.log(`Correct Answer: ${correctAnswer}`);
-
-    // Click the button with the correct answer
-    const correctChoiceButton = page.locator(`.choices button:has-text("${correctAnswer}")`);
-    await correctChoiceButton.click();
-    console.log(`Clicked the correct answer: ${correctAnswer}`);
-
-    // Verify feedback result
     const resultDiv = page.locator('.result');
     await expect(resultDiv).toBeVisible();
 
-    const resultText = (await resultDiv.textContent()).trim();
-    console.log(`Result displayed: ${resultText}`);
+    await page.locator('#next-btn').click();
 
-    // Click the Next button
-    const nextButton = page.locator('#next-btn');
-    await nextButton.click();
-
-    // Verify a new question appears
-    const newQuestion = (await page.locator('.question').textContent()).trim();
+    const newQuestion = (await questionLocator.textContent()).trim();
     expect(newQuestion).not.toBe(question);
-    console.log(`New question displayed: ${newQuestion}`);
-
-    // End the test after verifying the first question cycle
-    console.log('Ending test after first question cycle.');
   });
 });
