@@ -20,3 +20,29 @@ Playwright end-to-end tests for the [Dutch-English Phrase Game](https://dutch-en
    ```
 
    Use `npx playwright test --project=chromium` to run only Chromium. Add `--headed` to see the browser.
+
+## QA Workflow
+
+This project follows a simple and structured QA workflow:
+
+* **Test plans** → `docs/templates/test-plan.md`
+* **Test summaries** → `docs/templates/test-summary.md`
+* **Bug tracking** → GitHub Issues (with bug report template)
+* **Progress tracking** → GitHub Projects (QA Board)
+* **Change history** → `CHANGELOG.md`
+
+### Workflow Loop
+
+1. Define scope (test plan)
+2. Run tests (Playwright + manual)
+3. Log bugs (GitHub Issues)
+4. Fix and verify
+5. Write test summary
+
+### Goal
+
+Keep testing:
+
+* simple
+* reproducible
+* clearly documented
