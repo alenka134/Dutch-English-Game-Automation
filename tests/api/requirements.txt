@@ -1,0 +1,5 @@
+# Install with: python3.10 -m pip install -r tests/api/requirements.txt
+# Use Python 3.10.x to stay aligned with Django-supported interpreters.
+pytest>=8,<10
+pytest-html>=4,<5
+requests>=2.31,<3

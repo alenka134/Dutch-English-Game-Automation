@@ -1,15 +1,56 @@
-name: Playwright Tests
+# API and UI tests run in parallel (separate jobs) — faster CI, separate artifacts & summaries.
+name: QA Tests (UI + API)
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-  test:
+  api-tests:
+    name: API (pytest)
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Python test dependencies
+        run: python -m pip install -r tests/api/requirements.txt
+
+      - name: Run API tests + HTML report
+        env:
+          RUN_API_TESTS: "1"
+        run: |
+          mkdir -p reports/api
+          python -m pytest tests/api -v \
+            --html=reports/api/index.html \
+            --self-contained-html
+
+      - name: API summary for GitHub Actions
+        if: always()
+        run: |
+          echo "### API smoke tests (pytest)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Job:** API (pytest)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **HTML report:** download artifact **api-html-report** below" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Target:** production Netlify (default) — see \`API_BASE_URL\` in tests" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload API HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-html-report
+          path: reports/api/
+          if-no-files-found: warn
+
+  ui-tests:
+    name: UI (Playwright)
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -19,11 +60,26 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install JS dependencies
         run: npm install
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Run Playwright tests + HTML report
+        run: npx playwright test --reporter=html --reporter=line
+
+      - name: UI summary for GitHub Actions
+        if: always()
+        run: |
+          echo "### UI tests (Playwright)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Job:** UI (Playwright)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **HTML report:** download artifact **playwright-html-report** below" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report/
+          if-no-files-found: warn
