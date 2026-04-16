@@ -25,6 +25,7 @@ module.exports = defineConfig({
       mode: 'retain-on-failure',
       size: { width: 1280, height: 720 },
     },
+    ...(isCi ? { trace: 'retain-on-failure' } : {}),
   },
   projects: [
     { name: 'chromium', use: { browserName: 'chromium' } },

@@ -86,3 +86,13 @@ jobs:
           name: playwright-html-report
           path: playwright-report
           if-no-files-found: warn
+
+      # Screenshots, videos, and traces live under test-results/ when tests fail.
+      - name: Upload Playwright failure assets (screenshots, video, trace)
+        if: ${{ failure() && !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results
+          retention-days: 14
+          if-no-files-found: warn

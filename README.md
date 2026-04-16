@@ -113,11 +113,31 @@ git diff
 git push origin <your-branch>
 ```
 
+### Git caveman: `master` on GitHub = `master` on your Mac
+
+**You changed files → send to GitHub:**
+
+```bash
+git checkout master
+git add -A
+git commit -m "describe change"
+git push origin master
+```
+
+**GitHub changed (you edited on web, other PC, or merged PR) → pull into local `master`:**
+
+```bash
+git checkout master
+git pull origin master
+```
+
+Same branch name (`master`) locally and on `origin`; `pull` updates your Mac to match GitHub.
+
 ---
 
 ## CI reports & [QA Board](https://github.com/users/alenka134/projects/1)
 
-- **GitHub Actions:** open the workflow run → section **Artifacts** → download **api-html-report** or **playwright-html-report** (open `index.html` in a browser). Each job also writes a short summary on the run page (**API** vs **UI**).
+- **GitHub Actions:** open the workflow run → section **Artifacts** → download **api-html-report** or **playwright-html-report** (open `index.html` in a browser). If UI tests **fail**, an extra artifact **playwright-test-results** is uploaded (screenshots, video, trace under `test-results/`). Each job also writes a short summary on the run page (**API** vs **UI**).
 - **Projects (QA Board):** the board tracks **issues and work items**, not embedded HTML. Use it for bugs and tasks; use **Actions → Artifacts** for full HTML test output. The workflow badge in this README reflects whether **both** jobs passed.
 
 ---
