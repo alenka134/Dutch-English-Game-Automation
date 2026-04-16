@@ -1,48 +1,62 @@
-# Dutch-English Phrase Game Automation
+# 🧪 Dutch-English Phrase Game Automation
+
+![Playwright Tests](https://github.com/alenka134/Dutch-English-Game-Automation/actions/workflows/playwright.yml/badge.svg)
 
 Playwright end-to-end tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/).
 
-## Setup
+---
 
-1. Clone the repository:
+## 🚀 Setup
 
-   ```bash
-   git clone https://github.com/alenka134/Dutch-English-Game-Automation.git
-   cd Dutch-English-Game-Automation
-   ```
+Clone the repository:
 
-2. Install dependencies and browsers, then run tests:
+```bash
+git clone https://github.com/alenka134/Dutch-English-Game-Automation.git
+cd Dutch-English-Game-Automation
+````
 
-   ```bash
-   npm install
-   npx playwright install
-   npm test
-   ```
+Install dependencies:
 
-   Use `npx playwright test --project=chromium` to run only Chromium. Add `--headed` to see the browser.
+```bash
+npm install
+npx playwright install
+```
 
-## QA Workflow
+Run tests:
 
-This project follows a simple and structured QA workflow:
+```bash
+npm test
+```
 
-* **Test plans** → `docs/templates/test-plan.md`
-* **Test summaries** → `docs/templates/test-summary.md`
-* **Bug tracking** → GitHub Issues (with bug report template)
-* **Progress tracking** → GitHub Projects (QA Board)
-* **Change history** → `CHANGELOG.md`
+Optional:
 
-### Workflow Loop
+```bash
+npx playwright test --project=chromium
+npx playwright test --headed
+```
 
-1. Define scope (test plan)
-2. Run tests (Playwright + manual)
-3. Log bugs (GitHub Issues)
+---
+
+## 🧪 QA Workflow
+
+This project follows a simple QA workflow:
+
+* Test plans → `docs/templates/test-plan.md`
+* Test summaries → `docs/templates/test-summary.md`
+* Bug tracking → GitHub Issues (bug report template)
+* Progress tracking → GitHub Projects (QA Board)
+* Change history → `CHANGELOG.md`
+
+### Workflow
+
+1. Define test scope
+2. Run automated tests
+3. Log bugs in GitHub Issues
 4. Fix and verify
-5. Write test summary
+5. Document results in test summary
 
-### Goal
+---
 
-Keep testing:
+### 🎯 Goal
 
-* simple
-* reproducible
-* clearly documented
+Keep testing simple, reproducible, and well documented.
