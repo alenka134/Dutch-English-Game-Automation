@@ -51,6 +51,9 @@ jobs:
   ui-tests:
     name: UI (Playwright)
     runs-on: ubuntu-latest
+    env:
+      # Ensures HTML report is written instead of trying to open a browser on the runner.
+      PLAYWRIGHT_HTML_OPEN: never
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -67,7 +70,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests + HTML report
-        run: npx playwright test --reporter=html --reporter=line
+        run: npx playwright test
 
       - name: UI summary for GitHub Actions
         if: always()
@@ -77,9 +80,9 @@ jobs:
           echo "- **HTML report:** download artifact **playwright-html-report** below" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Playwright HTML report
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-html-report
-          path: playwright-report/
+          path: playwright-report
           if-no-files-found: warn

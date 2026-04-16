@@ -75,12 +75,42 @@ python3.10 -m pytest tests/api -v && npx playwright test
 
 ### HTML reports (local)
 
+**API (pytest-html):**
+
 ```bash
 mkdir -p reports/api
 export RUN_API_TESTS=1
 python3.10 -m pytest tests/api -v --html=reports/api/index.html --self-contained-html
-npx playwright test --reporter=html
-# Open playwright-report/index.html
+# Open reports/api/index.html in a browser
+```
+
+**UI (Playwright):** `playwright.config.js` turns on the HTML reporter when **`CI` is set** (same as GitHub Actions). For a local report that matches CI:
+
+```bash
+CI=true npx playwright test
+# Open playwright-report/index.html (or: npx playwright show-report)
+```
+
+Quick one-off HTML without setting `CI`: `npx playwright test --reporter=html` (then open `playwright-report/index.html`).
+
+---
+
+## Verify before `git push` (VS Code terminal)
+
+In **Terminal → New Terminal**, from the repo root run the same checks CI runs (API + UI). No need to generate HTML for a quick check.
+
+```bash
+cd /path/to/DutchEnglishAutomation   # or your clone folder
+export RUN_API_TESTS=1
+python3.10 -m pytest tests/api -v && npx playwright test
+```
+
+Review changes, then push:
+
+```bash
+git status
+git diff
+git push origin <your-branch>
 ```
 
 ---
