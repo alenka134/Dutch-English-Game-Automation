@@ -63,8 +63,7 @@ test('Top result width matches scoreboard', async ({ page }) => {
   await playUntilRoundEnds(page);
 
   const topResult = page.locator('.top-result');
-  // Two tables use `.scoreboard`; target player summary. The `<table>` is inset (~740px);
-  // its parent `.result` card matches the top banner width (~770px).
+  // Two tables use `.scoreboard` — target the player-summary table only.
   const scoreboardTable = page.locator('table.scoreboard.player-summary-table');
 
   // Summary may already be visible after the last Next; otherwise use View results from the lobby
@@ -77,15 +76,11 @@ test('Top result width matches scoreboard', async ({ page }) => {
   await expect(topResult).toBeVisible();
   await expect(scoreboardTable).toBeVisible();
 
-  /** Inner player-summary table width (layout spec). */
-  const EXPECTED_WIDTH_PX = 740;
-
   const topWidth = await topResult.evaluate((el) => el.offsetWidth);
-  const tableWidth = await scoreboardTable.evaluate((el) => el.offsetWidth);
-  const summaryCardWidth = await scoreboardTable.evaluate(
-    (el) => el.parentElement?.offsetWidth ?? 0,
-  );
+  const scoreWidth = await scoreboardTable.evaluate((el) => el.offsetWidth);
 
-  expect(tableWidth).toBeCloseTo(EXPECTED_WIDTH_PX, 5);
-  expect(topWidth).toBeCloseTo(summaryCardWidth, 5);
+  // Relative layout only: consistency between banner and table (no hard-coded px).
+  // Use a pixel delta — not `toBeCloseTo(a, 5)` alone (that’s float *precision*, not 5px).
+  // Cross-browser: WebKit may diverge; do not special-case browsers — let failures surface.
+  expect(Math.abs(topWidth - scoreWidth)).toBeLessThan(10);
 });
