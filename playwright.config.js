@@ -6,8 +6,14 @@ module.exports = defineConfig({
   retries: 1,
   use: {
     headless: true,
+    // Fixed layout + recording size so traces/videos aren’t tiny or oddly scaled
+    viewport: { width: 1280, height: 720 },
+    deviceScaleFactor: 1,
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: {
+      mode: 'retain-on-failure',
+      size: { width: 1280, height: 720 },
+    },
   },
   projects: [
     { name: 'chromium', use: { browserName: 'chromium' } },
