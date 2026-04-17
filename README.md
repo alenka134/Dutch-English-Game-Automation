@@ -10,9 +10,26 @@ Playwright end-to-end tests (with a **Page Object Model** in `pages/`, shared he
 
 | Path | Role |
 |------|------|
-| `pages/GameAppPage.js` | Page Object: URLs, locators, user flows (enter name, start game, answer question, results). |
-| `helpers/phraseHelpers.js` | Pure helpers: parse Dutch from question text, map to English from `data/data.json`. |
-| `tests/*.spec.js` | Thin specs: arrange `GameAppPage`, assert outcomes. |
+| `pages/GameAppPage.js` | Page Object: locators, navigation, and game flows (lobby → play → results). |
+| `helpers/phraseHelpers.js` | Pure helpers (no Playwright): quoted Dutch in question text → phrase string; phrase → English via `data/data.json`. |
+| `tests/game.spec.js`, `tests/ui.spec.js` | E2E specs: thin layers over `GameAppPage` + assertions. |
+| `tests/phraseHelpers.spec.js` | Fast checks that parsing and `data/data.json` matching behave as expected (no browser). |
+
+### Helper contract (`helpers/phraseHelpers.js`)
+
+- **`dutchPhraseFromQuestion(rawQuestion)`** — Reads the Dutch snippet from the live question string. Supports **double-quoted** and **single-quoted** phrases; trims whitespace; throws if no quoted segment is found.
+- **`englishForPhrase(dutchPhrase)`** — Looks up the English answer in **`data/data.json`** (`phrases[]`). Trims input; throws if nothing matches.
+- **`entryMatchesDutch(entry, phrase)`** — Used internally for lookup; supports `entry.dutch` as a string or an array of alternates; compares trimmed strings.
+
+Specs should not re-parse questions by hand: use **`GameAppPage`** methods or these helpers so UI text changes stay in one place.
+
+### Page object API (`pages/GameAppPage.js`)
+
+- **URL:** default production Netlify URL; override with env **`GAME_URL`** (full URL including trailing path if needed).
+- **Flow:** `goto()` → `enterNameAndContinue(name)` → `startGameFromLobby()` (visible + **enabled** start button) → `expectGameVisible()` (`.game`, **10s** timeout for slower engines).
+- **Question / answer:** `getQuestionText()`, `getCurrentDutchPhrase()`, `getCorrectEnglishAnswer()`, then `choiceButtonForEnglish(text)` or the combined **`answerCurrentQuestion()`** (expects result + clicks **Next**).
+- **Round / summary:** `playUntilRoundEnds()` stops when the question no longer contains a quoted phrase; **`openViewResultsIfNeeded()`** uses **View results** when the top banner is not visible yet.
+- **Dialogs:** call **`acceptDialogs()`** once before steps that can trigger `window` dialogs (e.g. some flows in `ui.spec.js`).
 
 **Allure (Playwright):** each run writes `allure-results/`. Generate and open a static report locally (needs **Java 17+** on your machine, same as CI):
 
@@ -63,6 +80,12 @@ Optional:
 ```bash
 npx playwright test --project=chromium
 npx playwright test --headed
+```
+
+Run only helper + main UI specs (quick sanity after refactors):
+
+```bash
+npx playwright test tests/phraseHelpers.spec.js tests/game.spec.js tests/ui.spec.js --workers=1
 ```
 
 ### API (pytest)

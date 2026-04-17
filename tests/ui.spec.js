@@ -8,6 +8,7 @@ test('Top result width matches scoreboard', async ({ page }) => {
   await game.goto();
   await game.enterNameAndContinue('Tester');
   await game.startGameFromLobby();
+  await game.expectGameVisible();
 
   await game.playUntilRoundEnds();
 
