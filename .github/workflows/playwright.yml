@@ -85,27 +85,30 @@ jobs:
         if: always()
         shell: bash
         run: |
-          set -eu
+          set -euo pipefail
           echo "::group::Allure results (raw)"
           if [ -d allure-results ]; then
+            echo "Allure results file count:"
             find allure-results -type f | wc -l
             find allure-results -type f | head -20 || true
           else
-            echo "no allure-results directory"
+            echo "ERROR: allure-results directory is missing."
+            exit 1
           fi
           echo "::endgroup::"
-          if [ -d allure-results ] && [ -n "$(find allure-results -type f 2>/dev/null | head -1)" ]; then
-            npx allure generate allure-results -o allure-report --clean
-            du -sh allure-report || true
-            # Single archive: upload-artifact v4.4+ skips dotfiles; Allure uses many small assets — tar keeps the full site.
-            tar -czf allure-report-site.tgz -C allure-report .
-            ls -la allure-report-site.tgz
-          else
-            mkdir -p allure-report
-            echo '<!DOCTYPE html><html><body><p>No Allure results in this run.</p></body></html>' > allure-report/index.html
-            tar -czf allure-report-site.tgz -C allure-report .
-            ls -la allure-report-site.tgz
+          if [ -z "$(find allure-results -type f 2>/dev/null | head -1)" ]; then
+            echo "ERROR: allure-results directory is empty or contains no files."
+            exit 1
           fi
+          npx allure generate allure-results -o allure-report --clean
+          if [ ! -d allure-report ] || [ -z "$(find allure-report -type f 2>/dev/null | head -1)" ]; then
+            echo "ERROR: allure-report generation failed: no files created in allure-report/."
+            exit 1
+          fi
+          du -sh allure-report
+          # Single archive: upload-artifact v4.4+ skips dotfiles; Allure uses many small assets — tar keeps the full site.
+          tar -czf allure-report-site.tgz -C allure-report .
+          ls -la allure-report-site.tgz
 
       - name: UI summary for GitHub Actions
         if: always()
