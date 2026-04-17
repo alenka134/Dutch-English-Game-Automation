@@ -3,9 +3,9 @@ name: QA Tests (UI + API)
 
 on:
   push:
-    branches: [master, allure_report]
+    branches: [master]
   pull_request:
-    branches: [master, allure_report]
+    branches: [master]
 
 jobs:
   api-tests:

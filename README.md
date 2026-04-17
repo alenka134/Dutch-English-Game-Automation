@@ -2,7 +2,7 @@
 
 ![Playwright Tests](https://github.com/alenka134/Dutch-English-Game-Automation/actions/workflows/playwright.yml/badge.svg)
 
-Playwright end-to-end tests (with a **Page Object Model** in `pages/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). CI runs API + UI on **master** and branch **allure_report** (see **QA Tests (UI + API)** in GitHub Actions).
+Playwright end-to-end tests (with a **Page Object Model** in `pages/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). CI runs API + UI on **master** (see **QA Tests (UI + API)** in GitHub Actions).
 
 ---
 
