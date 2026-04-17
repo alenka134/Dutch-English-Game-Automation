@@ -180,7 +180,7 @@ Same branch name (`master`) locally and on `origin`; `pull` updates your Mac to 
 
 ## CI reports & [QA Board](https://github.com/users/alenka134/projects/1)
 
-- **GitHub Actions:** open the workflow run → section **Artifacts** → **api-html-report**, **playwright-html-report** (open `index.html`), **allure-results** (raw), **allure-report** (generated HTML site; open `index.html`). If UI tests **fail**, **playwright-test-results** includes screenshots, video, and traces under `test-results/`. Each job also writes a short summary on the run page (**API** vs **UI**).
+- **GitHub Actions:** open the workflow run → section **Artifacts** → **api-html-report**, **playwright-html-report** (open `index.html`), **allure-results** (raw), **allure-report-site.tgz** (full Allure HTML: extract with `tar -xzf allure-report-site.tgz`, then open `index.html` in that folder). If UI tests **fail**, **playwright-test-results** includes screenshots, video, and traces under `test-results/`. Each job also writes a short summary on the run page (**API** vs **UI**).
 - **Projects (QA Board):** the board tracks **issues and work items**, not embedded HTML. Use it for bugs and tasks; use **Actions → Artifacts** for full HTML test output. The workflow badge in this README reflects whether **both** jobs passed.
 
 ---

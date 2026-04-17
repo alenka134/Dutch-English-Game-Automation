@@ -11,13 +11,13 @@ module.exports = defineConfig({
   reporter: isCi
     ? [
         ['html', { open: 'never', outputFolder: 'playwright-report' }],
-        ['allure-playwright', { resultsDir: 'allure-results' }],
+        ['allure-playwright', { outputFolder: 'allure-results' }],
         ['github'],
         ['line'],
       ]
     : [
         ['list'],
-        ['allure-playwright', { resultsDir: 'allure-results' }],
+        ['allure-playwright', { outputFolder: 'allure-results' }],
       ],
   use: {
     headless: true,

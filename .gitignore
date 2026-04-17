@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 allure-results/
 allure-report/
+allure-report-site.tgz
 test-results/
 reports/
 playwright-report/

@@ -54,6 +54,8 @@ jobs:
     env:
       # Ensures HTML report is written instead of trying to open a browser on the runner.
       PLAYWRIGHT_HTML_OPEN: never
+      # Explicit Allure results dir (matches allure-js-commons + allure-playwright v2).
+      ALLURE_RESULTS_DIR: allure-results
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -81,12 +83,28 @@ jobs:
 
       - name: Generate Allure static HTML (from allure-results)
         if: always()
+        shell: bash
         run: |
-          if [ -d allure-results ] && [ -n "$(ls -A allure-results 2>/dev/null)" ]; then
+          set -eu
+          echo "::group::Allure results (raw)"
+          if [ -d allure-results ]; then
+            find allure-results -type f | wc -l
+            find allure-results -type f | head -20 || true
+          else
+            echo "no allure-results directory"
+          fi
+          echo "::endgroup::"
+          if [ -d allure-results ] && [ -n "$(find allure-results -type f 2>/dev/null | head -1)" ]; then
             npx allure generate allure-results -o allure-report --clean
+            du -sh allure-report || true
+            # Single archive: upload-artifact v4.4+ skips dotfiles; Allure uses many small assets — tar keeps the full site.
+            tar -czf allure-report-site.tgz -C allure-report .
+            ls -la allure-report-site.tgz
           else
             mkdir -p allure-report
             echo '<!DOCTYPE html><html><body><p>No Allure results in this run.</p></body></html>' > allure-report/index.html
+            tar -czf allure-report-site.tgz -C allure-report .
+            ls -la allure-report-site.tgz
           fi
 
       - name: UI summary for GitHub Actions
@@ -95,7 +113,7 @@ jobs:
           echo "### UI tests (Playwright)" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Job:** UI (Playwright)" >> "$GITHUB_STEP_SUMMARY"
           echo "- **HTML report:** artifact **playwright-html-report**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Allure:** raw **allure-results**, generated site **allure-report** (open \`allure-report/index.html\`)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Allure:** **allure-results** (raw), **allure-report-site.tgz** (extract → open \`index.html\`)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Playwright HTML report
         if: ${{ !cancelled() }}
@@ -104,6 +122,7 @@ jobs:
           name: playwright-html-report
           path: playwright-report
           if-no-files-found: warn
+          include-hidden-files: true
 
       # Screenshots, videos, and traces live under test-results/ when tests fail.
       - name: Upload Playwright failure assets (screenshots, video, trace)
@@ -114,6 +133,7 @@ jobs:
           path: test-results
           retention-days: 14
           if-no-files-found: warn
+          include-hidden-files: true
 
       - name: Upload Allure raw results
         if: always()
@@ -122,11 +142,12 @@ jobs:
           name: allure-results
           path: allure-results
           if-no-files-found: warn
+          include-hidden-files: true
 
-      - name: Upload Allure HTML site
+      - name: Upload Allure HTML (tarball — full report)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report
-          path: allure-report
+          name: allure-report-site
+          path: allure-report-site.tgz
           if-no-files-found: warn
