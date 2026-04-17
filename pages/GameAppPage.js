@@ -1,7 +1,8 @@
 const { expect } = require('@playwright/test');
 const { dutchPhraseFromQuestion, englishForPhrase } = require('../helpers/phraseHelpers');
 
-const DEFAULT_GAME_URL = 'https://dutch-english-phrase-game.netlify.app/';
+const DEFAULT_GAME_URL = process.env.GAME_URL || 'https://dutch-english-phrase-game.netlify.app/';
+const QUESTION_QUOTE_REGEX = /['"][^'"]+['"]/;
 
 /**
  * Page Object for the Dutch–English Phrase Game (Netlify).
@@ -42,11 +43,25 @@ class GameAppPage {
 
   async startGameFromLobby() {
     await expect(this.startButton).toBeVisible();
+    await expect(this.startButton).toBeEnabled();
     await this.startButton.click();
   }
 
   async expectGameVisible() {
-    await expect(this.gameRoot).toBeVisible();
+    await expect(this.gameRoot).toBeVisible({ timeout: 10_000 });
+  }
+
+  async getQuestionText() {
+    const raw = await this.question.textContent();
+    return (raw ?? '').trim();
+  }
+
+  async getCurrentDutchPhrase() {
+    return dutchPhraseFromQuestion(await this.getQuestionText());
+  }
+
+  async getCorrectEnglishAnswer() {
+    return englishForPhrase(await this.getCurrentDutchPhrase());
   }
 
   /** @param {string} englishLabel */
@@ -64,9 +79,7 @@ class GameAppPage {
 
   async answerCurrentQuestion() {
     await this.expectGameVisible();
-    const question = (await this.question.textContent()).trim();
-    const dutchPhrase = dutchPhraseFromQuestion(question);
-    const correctAnswer = englishForPhrase(dutchPhrase);
+    const correctAnswer = await this.getCorrectEnglishAnswer();
     await this.choiceButtonForEnglish(correctAnswer).click();
     await this.expectResultVisible();
     await this.clickNext();
@@ -75,8 +88,8 @@ class GameAppPage {
   /** Play until `.question` no longer shows a quoted Dutch phrase (e.g. session summary). */
   async playUntilRoundEnds(maxRounds = 30) {
     for (let i = 0; i < maxRounds; i += 1) {
-      const raw = ((await this.question.textContent()) ?? '').trim();
-      if (!/"[^"]+"/.test(raw)) {
+      const raw = await this.getQuestionText();
+      if (!QUESTION_QUOTE_REGEX.test(raw)) {
         return;
       }
       await this.answerCurrentQuestion();
