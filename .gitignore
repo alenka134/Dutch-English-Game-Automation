@@ -5,6 +5,8 @@ __pycache__/
 allure-results/
 allure-report/
 allure-report-site.tgz
+allure-view/
+allure-artifact/
 test-results/
 reports/
 playwright-report/

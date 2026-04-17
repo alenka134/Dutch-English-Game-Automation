@@ -41,6 +41,29 @@ npm run test:allure:open
 
 **Note:** `allure-playwright@2` matches the current `@playwright/test@1.49`. Newer **Allure 3** adapters expect `@playwright/test >= 1.53`; upgrade Playwright when you want to move to Allure 3.
 
+#### Why the CI `allure-report-site.tgz` looks “empty” (1 KB `index.html`)
+
+`index.html` is **supposed to be small**: it is only a loader; the real content is in **`data/`**, **`widgets/`**, **`export/`**, etc. next to it. If you **double‑click** `index.html`, the browser uses **`file://`**, and Allure’s scripts **often cannot load** those folders, so you see a **blank white page** (not a broken zip).
+
+**View the report correctly** after downloading from GitHub: the artifact downloads as **`allure-report-site.zip`**. Inside is **`allure-report-site.tgz`**. Unzip, then extract the tarball; **`npx allure open .`** serves the report at **`http://127.0.0.1:…`** (do not open `index.html` via `file://`). Change the zip path if yours is not in `~/Downloads/`.
+
+```bash
+# Run from a parent folder (e.g. Desktop or your home dir), not inside allure-view.
+rm -rf allure-artifact allure-view
+mkdir -p allure-artifact allure-view
+unzip -o ~/Downloads/allure-report-site.zip -d allure-artifact
+ls allure-artifact
+tar -xzf allure-artifact/allure-report-site.tgz -C allure-view
+ls allure-view
+cd allure-view
+npx allure open .
+# Browser opens at http://127.0.0.1:<port>/ — press Ctrl+C in the terminal to stop the server.
+```
+
+Alternative without Allure CLI: `cd allure-view && python3 -m http.server 8765` then open `http://localhost:8765`.
+
+If **View Page Source** on `index.html` shows only a short HTML shell and **no** `data` folder exists beside `index.html`, the archive was extracted into the wrong place or is incomplete.
+
 ---
 
 ## 🚀 Setup
@@ -180,8 +203,12 @@ Same branch name (`master`) locally and on `origin`; `pull` updates your Mac to 
 
 ## CI reports & [QA Board](https://github.com/users/alenka134/projects/1)
 
-- **GitHub Actions:** open the workflow run → section **Artifacts** → **api-html-report**, **playwright-html-report** (open `index.html`), **allure-results** (raw), **allure-report-site.tgz** (full Allure HTML: extract with `tar -xzf allure-report-site.tgz`, then open `index.html` in that folder). If UI tests **fail**, **playwright-test-results** includes screenshots, video, and traces under `test-results/`. Each job also writes a short summary on the run page (**API** vs **UI**).
+- **GitHub Actions:** open the workflow run → **Artifacts** → **api-html-report**, **playwright-html-report** (open `index.html` in a browser), **allure-results** (raw), **allure-report-site** (downloads as **`allure-report-site.zip`** → unzip → run **`tar -xzf`** on the inner **`.tgz`**, then **`npx allure open .`** — not `file://` / double‑click; see **Why the CI allure-report-site.tgz looks “empty”** above). If UI tests **fail**, **playwright-test-results** includes screenshots, video, and traces under `test-results/`. Each job also writes a short summary on the run page (**API** vs **UI**).
 - **Projects (QA Board):** the board tracks **issues and work items**, not embedded HTML. Use it for bugs and tasks; use **Actions → Artifacts** for full HTML test output. The workflow badge in this README reflects whether **both** jobs passed.
+
+### Workflow annotations (“Node.js 20 actions are deprecated”)
+
+That message is a **GitHub platform notice**, not a test failure. GitHub runs each official action’s JavaScript on a built-in Node version; older action majors used **Node 20**, which is being retired in favour of **Node 24** ([changelog](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/)). This repo’s workflow pins **newer action tags** (`checkout@v5`, `setup-python@v6`, `setup-node@v5`, `setup-java@v5`, `upload-artifact@v7`) so those warnings should disappear on the next run. Your **Playwright** job still installs **Node 20** for `npm`/`npx` via `setup-node` — that is separate from the action runtime above.
 
 ---
 

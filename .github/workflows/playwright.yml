@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: Upload API HTML report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: api-html-report
           path: reports/api/
@@ -58,12 +58,13 @@ jobs:
       ALLURE_RESULTS_DIR: allure-results
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
+          package-manager-cache: false
 
       - name: Install JS dependencies
         run: npm install
@@ -76,7 +77,7 @@ jobs:
 
       - name: Setup Java (Allure CLI needs a JRE)
         if: always()
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -116,11 +117,11 @@ jobs:
           echo "### UI tests (Playwright)" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Job:** UI (Playwright)" >> "$GITHUB_STEP_SUMMARY"
           echo "- **HTML report:** artifact **playwright-html-report**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Allure:** **allure-results** (raw), **allure-report-site.tgz** (extract → open \`index.html\`)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Allure:** **allure-results** (raw), **allure-report-site** — download is a **.zip**; unzip, then \`tar -xzf\` the inner **.tgz**, then \`npx allure open .\` (not \`file://\` / double-click \`index.html\`)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Playwright HTML report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-html-report
           path: playwright-report
@@ -130,7 +131,7 @@ jobs:
       # Screenshots, videos, and traces live under test-results/ when tests fail.
       - name: Upload Playwright failure assets (screenshots, video, trace)
         if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-test-results
           path: test-results
@@ -140,7 +141,7 @@ jobs:
 
       - name: Upload Allure raw results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: allure-results
           path: allure-results
@@ -149,7 +150,7 @@ jobs:
 
       - name: Upload Allure HTML (tarball — full report)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: allure-report-site
           path: allure-report-site.tgz
