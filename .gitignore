@@ -2,6 +2,8 @@ node_modules/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+allure-results/
+allure-report/
 test-results/
 reports/
 playwright-report/

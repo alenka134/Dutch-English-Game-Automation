@@ -1,86 +1,23 @@
 const { test, expect } = require('@playwright/test');
-const testData = require('../data/data.json');
-
-function dutchPhraseFromQuestion(rawQuestion) {
-  const match = rawQuestion.match(/"([^"]+)"/);
-  if (!match) {
-    throw new Error(`No quoted Dutch phrase in question: ${JSON.stringify(rawQuestion.trim())}`);
-  }
-  return match[1].trim();
-}
-
-function entryMatchesDutch(entry, phrase) {
-  if (Array.isArray(entry.dutch)) {
-    return entry.dutch.some((d) => d.trim() === phrase);
-  }
-  return entry.dutch.trim() === phrase;
-}
-
-function englishForPhrase(dutchPhrase) {
-  const match = testData.phrases.find((p) => entryMatchesDutch(p, dutchPhrase));
-  if (!match) {
-    throw new Error(`No matching phrase in data for: ${JSON.stringify(dutchPhrase)}`);
-  }
-  return match.english;
-}
-
-async function answerCurrentQuestion(page) {
-  await expect(page.locator('.game')).toBeVisible();
-  const question = (await page.locator('.question').textContent()).trim();
-  const dutchPhrase = dutchPhraseFromQuestion(question);
-  const correctAnswer = englishForPhrase(dutchPhrase);
-  await page.locator(`.choices button:has-text("${correctAnswer}")`).click();
-  await expect(page.locator('.result')).toBeVisible();
-  await page.locator('#next-btn').click();
-}
-
-/** Play until `.question` no longer shows a quoted Dutch phrase (e.g. session summary). */
-async function playUntilRoundEnds(page) {
-  for (let i = 0; i < 30; i += 1) {
-    const raw = ((await page.locator('.question').textContent()) ?? '').trim();
-    if (!/"[^"]+"/.test(raw)) {
-      return;
-    }
-    await answerCurrentQuestion(page);
-  }
-}
+const { GameAppPage } = require('../pages/GameAppPage');
 
 test('Top result width matches scoreboard', async ({ page }) => {
-  await page.goto('https://dutch-english-phrase-game.netlify.app/');
+  const game = new GameAppPage(page);
 
-  // Must register before any action that can open a dialog (e.g. submitting the name)
-  page.on('dialog', async (dialog) => {
-    await dialog.accept();
-  });
+  game.acceptDialogs();
+  await game.goto();
+  await game.enterNameAndContinue('Tester');
+  await game.startGameFromLobby();
 
-  await page.locator('#name').fill('Tester');
-  await page.locator('#enter-btn').click();
+  await game.playUntilRoundEnds();
 
-  const startButton = page.locator('#start-btn');
-  await expect(startButton).toBeVisible();
-  await startButton.click();
+  await game.openViewResultsIfNeeded();
 
-  await playUntilRoundEnds(page);
+  await expect(game.topResult).toBeVisible();
+  await expect(game.scoreboardPlayerTable).toBeVisible();
 
-  const topResult = page.locator('.top-result');
-  // Two tables use `.scoreboard` — target the player-summary table only.
-  const scoreboardTable = page.locator('table.scoreboard.player-summary-table');
+  const topWidth = await game.topResult.evaluate((el) => el.offsetWidth);
+  const scoreWidth = await game.scoreboardPlayerTable.evaluate((el) => el.offsetWidth);
 
-  // Summary may already be visible after the last Next; otherwise use View results from the lobby
-  if (!(await topResult.isVisible().catch(() => false))) {
-    const viewResults = page.locator('#view-results-btn');
-    await expect(viewResults).toBeVisible();
-    await viewResults.click();
-  }
-
-  await expect(topResult).toBeVisible();
-  await expect(scoreboardTable).toBeVisible();
-
-  const topWidth = await topResult.evaluate((el) => el.offsetWidth);
-  const scoreWidth = await scoreboardTable.evaluate((el) => el.offsetWidth);
-
-  // Relative layout only: consistency between banner and table (no hard-coded px).
-  // Use a pixel delta — not `toBeCloseTo(a, 5)` alone (that’s float *precision*, not 5px).
-  // Cross-browser: WebKit may diverge; do not special-case browsers — let failures surface.
   expect(Math.abs(topWidth - scoreWidth)).toBeLessThan(10);
 });

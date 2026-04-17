@@ -2,7 +2,27 @@
 
 ![Playwright Tests](https://github.com/alenka134/Dutch-English-Game-Automation/actions/workflows/playwright.yml/badge.svg)
 
-Playwright end-to-end tests and lightweight HTTP smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). CI runs both (see **QA Tests (UI + API)** in GitHub Actions).
+Playwright end-to-end tests (with a **Page Object Model** in `pages/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). CI runs API + UI on **master** and branch **allure_report** (see **QA Tests (UI + API)** in GitHub Actions).
+
+---
+
+## Test layout (POM + Allure)
+
+| Path | Role |
+|------|------|
+| `pages/GameAppPage.js` | Page Object: URLs, locators, user flows (enter name, start game, answer question, results). |
+| `helpers/phraseHelpers.js` | Pure helpers: parse Dutch from question text, map to English from `data/data.json`. |
+| `tests/*.spec.js` | Thin specs: arrange `GameAppPage`, assert outcomes. |
+
+**Allure (Playwright):** each run writes `allure-results/`. Generate and open a static report locally (needs **Java 17+** on your machine, same as CI):
+
+```bash
+npm test
+npm run test:allure:report
+npm run test:allure:open
+```
+
+**Note:** `allure-playwright@2` matches the current `@playwright/test@1.49`. Newer **Allure 3** adapters expect `@playwright/test >= 1.53`; upgrade Playwright when you want to move to Allure 3.
 
 ---
 
@@ -137,7 +157,7 @@ Same branch name (`master`) locally and on `origin`; `pull` updates your Mac to 
 
 ## CI reports & [QA Board](https://github.com/users/alenka134/projects/1)
 
-- **GitHub Actions:** open the workflow run → section **Artifacts** → download **api-html-report** or **playwright-html-report** (open `index.html` in a browser). If UI tests **fail**, an extra artifact **playwright-test-results** is uploaded (screenshots, video, trace under `test-results/`). Each job also writes a short summary on the run page (**API** vs **UI**).
+- **GitHub Actions:** open the workflow run → section **Artifacts** → **api-html-report**, **playwright-html-report** (open `index.html`), **allure-results** (raw), **allure-report** (generated HTML site; open `index.html`). If UI tests **fail**, **playwright-test-results** includes screenshots, video, and traces under `test-results/`. Each job also writes a short summary on the run page (**API** vs **UI**).
 - **Projects (QA Board):** the board tracks **issues and work items**, not embedded HTML. Use it for bugs and tasks; use **Actions → Artifacts** for full HTML test output. The workflow badge in this README reflects whether **both** jobs passed.
 
 ---

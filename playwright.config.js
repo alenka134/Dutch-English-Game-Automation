@@ -11,10 +11,14 @@ module.exports = defineConfig({
   reporter: isCi
     ? [
         ['html', { open: 'never', outputFolder: 'playwright-report' }],
+        ['allure-playwright', { resultsDir: 'allure-results' }],
         ['github'],
         ['line'],
       ]
-    : [['list']],
+    : [
+        ['list'],
+        ['allure-playwright', { resultsDir: 'allure-results' }],
+      ],
   use: {
     headless: true,
     // Fixed layout + recording size so traces/videos aren’t tiny or oddly scaled
