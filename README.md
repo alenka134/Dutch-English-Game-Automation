@@ -2,7 +2,7 @@
 
 ![Playwright Tests](https://github.com/alenka134/Dutch-English-Game-Automation/actions/workflows/playwright.yml/badge.svg)
 
-Playwright end-to-end tests (with a **Page Object Model** in `pages/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). CI runs API + UI on **master** (see **QA Tests (UI + API)** in GitHub Actions).
+Playwright end-to-end tests (with a **Page Object Model** in `pages/` + `utils/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). CI runs API + UI on **master** (see **QA Tests (UI + API)** in GitHub Actions).
 
 ---
 
@@ -10,9 +10,13 @@ Playwright end-to-end tests (with a **Page Object Model** in `pages/`, shared he
 
 | Path | Role |
 |------|------|
-| `pages/GameAppPage.js` | Page Object: locators, navigation, and game flows (lobby → play → results). |
+| `pages/HomePage.js` | Name entry (`getByRole` / `getByLabel`) and **Enter**. |
+| `pages/CategoryPage.js` | Category `<select>` + **Start Game** (pre-round lobby). |
+| `pages/GamePage.js` | In-round UI: timer, question, choices, results, **Next**, layout summary helpers. |
+| `pages/urls.js` | Shared default base URL (`GAME_URL` override). |
+| `utils/dialogHandler.js` | `attachAutoAcceptDialogs` (accept only) and `attachDialogHandler` (assert + accept). |
 | `helpers/phraseHelpers.js` | Pure helpers (no Playwright): quoted Dutch in question text → phrase string; phrase → English via `data/data.json`. |
-| `tests/game.spec.js`, `tests/ui.spec.js` | E2E specs: thin layers over `GameAppPage` + assertions. |
+| `tests/game.spec.js`, `tests/ui.spec.js` | E2E specs: thin layers over page objects + assertions. |
 | `tests/phraseHelpers.spec.js` | Fast checks that parsing and `data/data.json` matching behave as expected (no browser). |
 
 ### Helper contract (`helpers/phraseHelpers.js`)
@@ -21,15 +25,15 @@ Playwright end-to-end tests (with a **Page Object Model** in `pages/`, shared he
 - **`englishForPhrase(dutchPhrase)`** — Looks up the English answer in **`data/data.json`** (`phrases[]`). Trims input; throws if nothing matches.
 - **`entryMatchesDutch(entry, phrase)`** — Used internally for lookup; supports `entry.dutch` as a string or an array of alternates; compares trimmed strings.
 
-Specs should not re-parse questions by hand: use **`GameAppPage`** methods or these helpers so UI text changes stay in one place.
+Specs should not re-parse questions by hand: use **`GamePage`** (and phrase helpers) so UI text changes stay in one place.
 
-### Page object API (`pages/GameAppPage.js`)
+### Page object API
 
-- **URL:** default production Netlify URL; override with env **`GAME_URL`** (full URL including trailing path if needed).
-- **Flow:** `goto()` → `enterNameAndContinue(name)` → `startGameFromLobby()` (visible + **enabled** start button) → `expectGameVisible()` (`.game`, **10s** timeout for slower engines).
-- **Question / answer:** `getQuestionText()`, `getCurrentDutchPhrase()`, `getCorrectEnglishAnswer()`, then `choiceButtonForEnglish(text)` or the combined **`answerCurrentQuestion()`** (expects result + clicks **Next**).
-- **Round / summary:** `playUntilRoundEnds()` stops when the question no longer contains a quoted phrase; **`openViewResultsIfNeeded()`** uses **View results** when the top banner is not visible yet.
-- **Dialogs:** call **`acceptDialogs()`** once before steps that can trigger `window` dialogs (e.g. some flows in `ui.spec.js`).
+- **URL:** default production Netlify URL in **`pages/urls.js`**; override with env **`GAME_URL`** (full URL including trailing path if needed).
+- **Lobby:** **`HomePage`** — `goto()`, `submitName(name)` (triggers welcome + phrase-inventory alerts when dialogs are handled).
+- **Category:** **`CategoryPage`** — `expectVisible()`, `selectCategoryByValue(value)`, `startGame()` (round instruction alert, then game UI).
+- **In-round:** **`GamePage`** — `expectGameScreenVisible()` (`.game` + timer, **10s** timeout), `getQuestionText()`, `getCurrentDutchPhrase()`, `getCorrectEnglishAnswer()`, `choiceButton(text)`, **`answerCurrentQuestion()`**, **`playUntilRoundEnds()`**, **`openViewResultsIfNeeded()`**.
+- **Dialogs:** from **`utils/dialogHandler.js`**, use **`attachDialogHandler(page, name, { roundCategory })`** for welcome + phrase-inventory + round alerts (counts matched with `\d+`, not fixed numbers), or **`attachAutoAcceptDialogs(page, { onDialog })`** when you need custom collection (see `tests/ui.spec.js`).
 
 **Allure (Playwright):** each run writes `allure-results/`. Generate and open a static report locally (needs **Java 17+** on your machine, same as CI):
 

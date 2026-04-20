@@ -1,14 +1,23 @@
 const { test, expect } = require('@playwright/test');
-const { GameAppPage } = require('../pages/GameAppPage');
+const { attachDialogHandler } = require('../utils/dialogHandler');
+const { HomePage } = require('../pages/HomePage');
+const { CategoryPage, CATEGORY_VALUES } = require('../pages/CategoryPage');
+const { GamePage } = require('../pages/GamePage');
 
 test.describe('Dutch-English Phrase Game', () => {
   test('enters name, answers first question, advances', async ({ page }) => {
-    const game = new GameAppPage(page);
+    attachDialogHandler(page, 'Test Player', { roundCategory: 'simple phrases' });
 
-    await game.goto();
-    await game.enterNameAndContinue('Test Player');
-    await game.startGameFromLobby();
-    await game.expectGameVisible();
+    const home = new HomePage(page);
+    const category = new CategoryPage(page);
+    const game = new GamePage(page);
+
+    await home.goto();
+    await home.submitName('Test Player');
+    await category.expectVisible();
+    await category.selectCategoryByValue(CATEGORY_VALUES.SIMPLE);
+    await category.startGame();
+    await game.expectGameScreenVisible();
 
     const firstQuestion = await game.getQuestionText();
     await game.answerCurrentQuestion();
