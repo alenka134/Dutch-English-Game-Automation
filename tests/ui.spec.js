@@ -4,35 +4,38 @@ const { HomePage } = require('../pages/HomePage');
 const { CategoryPage, CATEGORY_VALUES, ROUND_ALERT_LABEL } = require('../pages/CategoryPage');
 const { GamePage } = require('../pages/GamePage');
 
-test('full onboarding flow reaches the game screen', async ({ page }) => {
-  attachDialogHandler(page, 'Tester', { roundCategory: ROUND_ALERT_LABEL.SIMPLE });
+/**
+ * Shared onboarding: dialogs, home → name → simple category → start (returns in-game page object).
+ * @param {import('@playwright/test').Page} page
+ * @param {string} name Must match the name used with {@link attachDialogHandler}.
+ * @returns {Promise<GamePage>}
+ */
+async function gotoSimpleCategoryGame(page, name) {
+  attachDialogHandler(page, name, { roundCategory: ROUND_ALERT_LABEL.SIMPLE });
 
   const home = new HomePage(page);
   const category = new CategoryPage(page);
   const game = new GamePage(page);
 
   await home.goto();
-  await home.submitName('Tester');
+  await home.submitName(name);
 
   await category.expectVisible();
   await category.selectCategoryByValue(CATEGORY_VALUES.SIMPLE);
   await category.startGame();
+
+  return game;
+}
+
+test('full onboarding flow reaches the game screen', async ({ page }) => {
+  const game = await gotoSimpleCategoryGame(page, 'Tester');
 
   await game.expectGameScreenVisible();
 });
 
 test('top result width matches scoreboard', async ({ page }) => {
-  attachDialogHandler(page, 'Tester', { roundCategory: ROUND_ALERT_LABEL.SIMPLE });
+  const game = await gotoSimpleCategoryGame(page, 'Tester');
 
-  const home = new HomePage(page);
-  const category = new CategoryPage(page);
-  const game = new GamePage(page);
-
-  await home.goto();
-  await home.submitName('Tester');
-  await category.expectVisible();
-  await category.selectCategoryByValue(CATEGORY_VALUES.SIMPLE);
-  await category.startGame();
   await game.expectGameScreenVisible();
 
   await game.playUntilRoundEnds();
