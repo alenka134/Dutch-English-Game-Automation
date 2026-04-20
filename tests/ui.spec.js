@@ -1,11 +1,11 @@
 const { test, expect } = require('@playwright/test');
 const { attachDialogHandler } = require('../utils/dialogHandler');
 const { HomePage } = require('../pages/HomePage');
-const { CategoryPage, CATEGORY_VALUES } = require('../pages/CategoryPage');
+const { CategoryPage, CATEGORY_VALUES, ROUND_ALERT_LABEL } = require('../pages/CategoryPage');
 const { GamePage } = require('../pages/GamePage');
 
 test('full onboarding flow reaches the game screen', async ({ page }) => {
-  attachDialogHandler(page, 'Tester', { roundCategory: 'simple phrases' });
+  attachDialogHandler(page, 'Tester', { roundCategory: ROUND_ALERT_LABEL.SIMPLE });
 
   const home = new HomePage(page);
   const category = new CategoryPage(page);
@@ -22,7 +22,7 @@ test('full onboarding flow reaches the game screen', async ({ page }) => {
 });
 
 test('top result width matches scoreboard', async ({ page }) => {
-  attachDialogHandler(page, 'Tester', { roundCategory: 'simple phrases' });
+  attachDialogHandler(page, 'Tester', { roundCategory: ROUND_ALERT_LABEL.SIMPLE });
 
   const home = new HomePage(page);
   const category = new CategoryPage(page);

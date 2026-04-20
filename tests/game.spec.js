@@ -1,12 +1,12 @@
 const { test, expect } = require('@playwright/test');
 const { attachDialogHandler } = require('../utils/dialogHandler');
 const { HomePage } = require('../pages/HomePage');
-const { CategoryPage, CATEGORY_VALUES } = require('../pages/CategoryPage');
+const { CategoryPage, CATEGORY_VALUES, ROUND_ALERT_LABEL } = require('../pages/CategoryPage');
 const { GamePage } = require('../pages/GamePage');
 
 test.describe('Dutch-English Phrase Game', () => {
   test('enters name, answers first question, advances', async ({ page }) => {
-    attachDialogHandler(page, 'Test Player', { roundCategory: 'simple phrases' });
+    attachDialogHandler(page, 'Test Player', { roundCategory: ROUND_ALERT_LABEL.SIMPLE });
 
     const home = new HomePage(page);
     const category = new CategoryPage(page);

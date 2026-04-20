@@ -36,4 +36,11 @@ const CATEGORY_VALUES = {
   PROFESSIONAL: 'professional_phrases',
 };
 
-module.exports = { CategoryPage, CATEGORY_VALUES };
+/** Lowercase label in the round `alert()` (`categoryLabel(key).toLowerCase()` in the app). */
+const ROUND_ALERT_LABEL = {
+  SIMPLE: 'simple phrases',
+  INTERVIEW: 'interview phrases',
+  PROFESSIONAL: 'professional phrases',
+};
+
+module.exports = { CategoryPage, CATEGORY_VALUES, ROUND_ALERT_LABEL };
