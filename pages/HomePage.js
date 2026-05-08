@@ -10,12 +10,14 @@ class HomePage {
     this.baseURL = baseURL;
   }
 
+  /** Label-associated field (`<label for="name">`). Prefer over role-only textbox queries. See `locator-tools/output/locator-inventory.md`. */
   nameInput() {
-    return this.page.getByRole('textbox', { name: /what is your name/i });
+    return this.page.getByLabel(/what is your name/i);
   }
 
+  /** Stable `id="enter-btn"` (icon/copy safe). */
   enterButton() {
-    return this.page.getByRole('button', { name: 'Enter' });
+    return this.page.locator('#enter-btn');
   }
 
   async goto() {
