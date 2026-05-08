@@ -6,8 +6,10 @@ class CategoryPage {
   constructor(page) {
     this.page = page;
     this.panel = page.locator('.category-selection');
-    this.categorySelect = page.getByLabel(/Select Phrase Category/i);
-    this.startButton = page.getByRole('button', { name: /Start Game/i });
+    /** `#category-selector` — stable id; keeps label semantics via `for` association in app HTML. */
+    this.categorySelect = page.locator('#category-selector');
+    /** `#start-btn` — avoids flaky matches on icon-only or punctuation drift (`Start Game!`). */
+    this.startButton = page.locator('#start-btn');
   }
 
   async expectVisible() {

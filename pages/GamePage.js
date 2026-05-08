@@ -14,15 +14,18 @@ class GamePage {
     this.question = this.root.locator('.question');
     this.choices = this.root.locator('.choices');
     this.result = this.root.locator('.result');
-    this.nextButton = page.getByRole('button', { name: 'Next' });
-    this.viewResultsButton = page.getByRole('button', { name: /View results/i });
+    /** `#next-btn` — stable id (`unstable-locators.md`: avoid Pause/Continue name churn). */
+    this.nextButton = page.locator('#next-btn');
+    /** `#view-results-btn` sits outside `.game` in markup; anchor at page level. */
+    this.viewResultsButton = page.locator('#view-results-btn');
     this.topResult = page.locator('.top-result');
     this.scoreboardPlayerTable = page.locator('table.scoreboard.player-summary-table');
   }
 
   async expectGameScreenVisible() {
     await expect(this.root).toBeVisible({ timeout: 10_000 });
-    await expect(this.root.getByText(/Time left/i)).toBeVisible();
+    /** Prefer `#timer` over copy-only matchers (`locator-inventory.md` stability 8+). Regex avoids exact second races. */
+    await expect(this.root.locator('#timer')).toHaveText(/\d+/);
   }
 
   async getQuestionText() {
