@@ -2,7 +2,7 @@
 
 ![Playwright Tests](https://github.com/alenka134/Dutch-English-Game-Automation/actions/workflows/playwright.yml/badge.svg)
 
-Playwright end-to-end tests (with a **Page Object Model** in `pages/` + `utils/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). The repo now contains **10 browser-free specs + 7 UI specs**. CI runs API + UI on **master** (see **QA Tests (UI + API)** in GitHub Actions).
+Playwright end-to-end tests (with a **Page Object Model** in `pages/` + `utils/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). The repo contains 4 Playwright spec files: 2 browser-free helper/contract specs and 2 UI specs, and CI runs API + UI on **master** (see **QA Tests (UI + API)** in GitHub Actions).
 
 ---
 
@@ -117,7 +117,7 @@ Run only helper + main UI specs (quick sanity after refactors):
 npx playwright test tests/phraseHelpers.spec.js tests/dataContract.spec.js tests/game.spec.js tests/ui.spec.js --workers=1
 ```
 
-This repo now contains **10 browser-free specs + 7 UI specs** in its focused test set.
+This repo currently contains 4 Playwright spec files plus a browser-free contract spec as its focused test set.
 
 ### API (pytest)
 
@@ -224,11 +224,11 @@ That message is a **GitHub platform notice**, not a test failure. GitHub runs ea
 
 This project follows a simple QA workflow:
 
-* Test plans → `docs/templates/test-plan.md`
-* Test summaries → `docs/templates/test-summary.md`
-* Bug tracking → GitHub Issues (bug report template)
-* Progress tracking → GitHub Projects (QA Board)
-* Change history → `CHANGELOG.md`
+- Test plans → `docs/templates/test-plan.md`
+- Test summaries → `docs/templates/test-summary.md`
+- Bug tracking → GitHub Issues (bug report template)
+- Progress tracking → GitHub Projects (QA Board)
+- Change history → `CHANGELOG.md`
 
 ### Workflow
 
