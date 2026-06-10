@@ -2,7 +2,7 @@
 
 ### Added
 - `tests/dataContract.spec.js` for browser-free contract coverage of `data/data.json`.
-- `helpers/gotoCategoryGame.js` to support category-parametrized smoke flows for SIMPLE, INTERVIEW, and PROFESSIONAL.
+- `tests/helpers/gotoSimpleCategoryGame.js` (exporting `gotoCategoryGame`) to support category-parametrized smoke flows for SIMPLE, INTERVIEW, and PROFESSIONAL.
 - New `GamePage` helpers: `getChoiceLabels()`, `answerCurrentQuestionWrong()`, and `clickPlayAgain()`.
 
 ### Improved

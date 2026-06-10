@@ -16,7 +16,7 @@ Playwright end-to-end tests (with a **Page Object Model** in `pages/` + `utils/`
 | `pages/urls.js` | Shared default base URL (`GAME_URL` override). |
 | `utils/dialogHandler.js` | `attachAutoAcceptDialogs` (accept only) and `attachDialogHandler` (assert + accept). |
 | `helpers/phraseHelpers.js` | Pure helpers (no Playwright): quoted Dutch in question text → phrase string; phrase → English via `data/data.json`. |
-| `helpers/gotoCategoryGame.js` | Category-parametrized helper for SIMPLE / INTERVIEW / PROFESSIONAL smoke flows. |
+| `tests/helpers/gotoSimpleCategoryGame.js` | Category-parametrized helper (`gotoCategoryGame` + `gotoSimpleCategoryGame` shorthand) for SIMPLE / INTERVIEW / PROFESSIONAL smoke flows. |
 | `tests/dataContract.spec.js` | Contract test coverage for `data/data.json` entries (browser-free). |
 | `tests/game.spec.js`, `tests/ui.spec.js` | E2E specs: thin layers over page objects + assertions. |
 | `tests/phraseHelpers.spec.js` | Fast checks that parsing and `data/data.json` matching behave as expected (no browser). |
