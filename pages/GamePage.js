@@ -20,6 +20,8 @@ class GamePage {
     this.viewResultsButton = page.locator('#view-results-btn');
     this.topResult = page.locator('.top-result');
     this.scoreboardPlayerTable = page.locator('table.scoreboard.player-summary-table');
+    /** End-of-round replay button. No stable id surfaced in the locator inventory, so match by role+name. */
+    this.playAgainButton = page.getByRole('button', { name: /play\s*again/i });
   }
 
   async expectGameScreenVisible() {
@@ -46,6 +48,22 @@ class GamePage {
     return this.choices.getByRole('button', { name: englishLabel });
   }
 
+  async getChoiceLabels() {
+    const labels = await this.choices.getByRole('button').allTextContents();
+    return labels.map((l) => l.trim()).filter(Boolean);
+  }
+
+  /** Pick any choice label that isn't the correct English answer. Throws if the round only renders one button. */
+  async getWrongChoiceLabel() {
+    const correct = await this.getCorrectEnglishAnswer();
+    const labels = await this.getChoiceLabels();
+    const wrong = labels.find((l) => l !== correct);
+    if (!wrong) {
+      throw new Error(`No wrong choice available — labels: ${JSON.stringify(labels)}`);
+    }
+    return wrong;
+  }
+
   async expectResultVisible() {
     await expect(this.result).toBeVisible();
   }
@@ -60,6 +78,14 @@ class GamePage {
     await this.choiceButton(correct).click();
     await this.expectResultVisible();
     await this.clickNext();
+  }
+
+  /** Click a deliberately wrong choice. Leaves the result on screen; caller decides when to advance. */
+  async answerCurrentQuestionWrong() {
+    await this.expectGameScreenVisible();
+    const wrong = await this.getWrongChoiceLabel();
+    await this.choiceButton(wrong).click();
+    await this.expectResultVisible();
   }
 
   /** Stops when the question no longer shows a quoted Dutch phrase (session summary / end). */
@@ -78,6 +104,11 @@ class GamePage {
       await expect(this.viewResultsButton).toBeVisible();
       await this.viewResultsButton.click();
     }
+  }
+
+  async clickPlayAgain() {
+    await expect(this.playAgainButton).toBeVisible();
+    await this.playAgainButton.click();
   }
 }
 

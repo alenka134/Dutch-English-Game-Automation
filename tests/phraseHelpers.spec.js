@@ -21,6 +21,16 @@ test.describe('phraseHelpers', () => {
     expect(english).toBe('Good morning');
   });
 
+  test('englishForPhrase resolves a phrase listed under an array of alternates', () => {
+    // data.json has { dutch: ["Wie ben jij?", " Hoe heet jij?", " Wat is jouw naam?"], english: "What's your name?" }
+    expect(englishForPhrase('Hoe heet jij?')).toBe("What's your name?");
+    expect(englishForPhrase('Wat is jouw naam?')).toBe("What's your name?");
+  });
+
+  test('englishForPhrase throws when no entry matches', () => {
+    expect(() => englishForPhrase('NietEenEchteZin')).toThrow('No matching phrase in data');
+  });
+
   test('entryMatchesDutch handles array and string values', () => {
     expect(entryMatchesDutch({ dutch: ['a', 'b'], english: 'x' }, 'b')).toBe(true);
     expect(entryMatchesDutch({ dutch: 'hello', english: 'x' }, 'hello')).toBe(true);
