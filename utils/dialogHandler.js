@@ -46,26 +46,31 @@ function attachDialogHandler(page, name, options = {}) {
   page.on('dialog', async (dialog) => {
     const msg = dialog.message();
 
-    if (/welcome/i.test(msg)) {
-      expect(msg).toMatch(
-        new RegExp(`Welcome\\s*,\\s*${escapeRegExp(name)}\\s*!`, 'i'),
-      );
-    }
+    // Accept first, then assert. Otherwise a failing expect() inside this
+    // listener leaves the dialog open and the test hangs until timeout
+    // instead of surfacing the real failure.
+    try {
+      await dialog.accept();
+    } finally {
+      if (/welcome/i.test(msg)) {
+        expect(msg).toMatch(
+          new RegExp(`Welcome\\s*,\\s*${escapeRegExp(name)}\\s*!`, 'i'),
+        );
+      }
 
-    if (/each\s+round\s+has\s+about/i.test(msg) || /phrases\s+available/i.test(msg)) {
-      expect(msg).toMatch(/Simple\s+phrases\s*:\s*\d+/i);
-      expect(msg).toMatch(/Interview\s+phrases\s*:\s*\d+/i);
-      expect(msg).toMatch(/Professional\s+phrases\s*:\s*\d+/i);
-    }
+      if (/each\s+round\s+has\s+about/i.test(msg) || /phrases\s+available/i.test(msg)) {
+        expect(msg).toMatch(/Simple\s+phrases\s*:\s*\d+/i);
+        expect(msg).toMatch(/Interview\s+phrases\s*:\s*\d+/i);
+        expect(msg).toMatch(/Professional\s+phrases\s*:\s*\d+/i);
+      }
 
-    if (/round\s*:/i.test(msg)) {
-      expect(msg).toMatch(/Round\s*:\s*\d+/i);
-      if (roundCategory != null && roundCategory !== '') {
-        expect(msg).toMatch(new RegExp(spacedPhrasePattern(roundCategory), 'i'));
+      if (/round\s*:/i.test(msg)) {
+        expect(msg).toMatch(/Round\s*:\s*\d+/i);
+        if (roundCategory != null && roundCategory !== '') {
+          expect(msg).toMatch(new RegExp(spacedPhrasePattern(roundCategory), 'i'));
+        }
       }
     }
-
-    await dialog.accept();
   });
 }
 

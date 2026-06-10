@@ -2,7 +2,7 @@
 
 ![Playwright Tests](https://github.com/alenka134/Dutch-English-Game-Automation/actions/workflows/playwright.yml/badge.svg)
 
-Playwright end-to-end tests (with a **Page Object Model** in `pages/` + `utils/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). CI runs API + UI on **master** (see **QA Tests (UI + API)** in GitHub Actions).
+Playwright end-to-end tests (with a **Page Object Model** in `pages/` + `utils/`, shared helpers in `helpers/`), **Allure** UI reporting, and lightweight API smoke tests for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/). The repo now contains **10 browser-free specs + 7 UI specs**. CI runs API + UI on **master** (see **QA Tests (UI + API)** in GitHub Actions).
 
 ---
 
@@ -16,6 +16,8 @@ Playwright end-to-end tests (with a **Page Object Model** in `pages/` + `utils/`
 | `pages/urls.js` | Shared default base URL (`GAME_URL` override). |
 | `utils/dialogHandler.js` | `attachAutoAcceptDialogs` (accept only) and `attachDialogHandler` (assert + accept). |
 | `helpers/phraseHelpers.js` | Pure helpers (no Playwright): quoted Dutch in question text → phrase string; phrase → English via `data/data.json`. |
+| `helpers/gotoCategoryGame.js` | Category-parametrized helper for SIMPLE / INTERVIEW / PROFESSIONAL smoke flows. |
+| `tests/dataContract.spec.js` | Contract test coverage for `data/data.json` entries (browser-free). |
 | `tests/game.spec.js`, `tests/ui.spec.js` | E2E specs: thin layers over page objects + assertions. |
 | `tests/phraseHelpers.spec.js` | Fast checks that parsing and `data/data.json` matching behave as expected (no browser). |
 
@@ -32,7 +34,7 @@ Specs should not re-parse questions by hand: use **`GamePage`** (and phrase help
 - **URL:** default production Netlify URL in **`pages/urls.js`**; override with env **`GAME_URL`** (full URL including trailing path if needed).
 - **Lobby:** **`HomePage`** — `goto()`, `submitName(name)` (triggers welcome + phrase-inventory alerts when dialogs are handled).
 - **Category:** **`CategoryPage`** — `expectVisible()`, `selectCategoryByValue(value)`, `startGame()` (round instruction alert, then game UI).
-- **In-round:** **`GamePage`** — `expectGameScreenVisible()` (`.game` + timer, **10s** timeout), `getQuestionText()`, `getCurrentDutchPhrase()`, `getCorrectEnglishAnswer()`, `choiceButton(text)`, **`answerCurrentQuestion()`**, **`playUntilRoundEnds()`**, **`openViewResultsIfNeeded()`**.
+- **In-round:** **`GamePage`** — `expectGameScreenVisible()` (`.game` + timer, **10s** timeout), `getQuestionText()`, `getCurrentDutchPhrase()`, `getCorrectEnglishAnswer()`, `getChoiceLabels()`, `choiceButton(text)`, **`answerCurrentQuestion()`**, `answerCurrentQuestionWrong()`, `clickPlayAgain()`, **`playUntilRoundEnds()`**, **`openViewResultsIfNeeded()`**.
 - **Dialogs:** from **`utils/dialogHandler.js`**, use **`attachDialogHandler(page, name, { roundCategory })`** for welcome + phrase-inventory + round alerts (counts matched with `\d+`, not fixed numbers), or **`attachAutoAcceptDialogs(page, { onDialog })`** when you need custom collection (see `tests/ui.spec.js`).
 
 **Allure (Playwright):** each run writes `allure-results/`. Generate and open a static report locally (needs **Java 17+** on your machine, same as CI):
@@ -112,8 +114,10 @@ npx playwright test --headed
 Run only helper + main UI specs (quick sanity after refactors):
 
 ```bash
-npx playwright test tests/phraseHelpers.spec.js tests/game.spec.js tests/ui.spec.js --workers=1
+npx playwright test tests/phraseHelpers.spec.js tests/dataContract.spec.js tests/game.spec.js tests/ui.spec.js --workers=1
 ```
+
+This repo now contains **10 browser-free specs + 7 UI specs** in its focused test set.
 
 ### API (pytest)
 
