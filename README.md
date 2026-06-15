@@ -1,6 +1,16 @@
 # Dutch-English Phrase Game — Test Automation
 
 ![QA Tests](https://github.com/alenka134/Dutch-English-Game-Automation/actions/workflows/playwright.yml/badge.svg)
+![Playwright](https://img.shields.io/badge/Playwright-2EAD33?logo=playwright&logoColor=white)
+![pytest](https://img.shields.io/badge/pytest-0A9EDC?logo=pytest&logoColor=white)
+![Allure](https://img.shields.io/badge/Allure-FF6F61?logo=qameta&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
+![Node](https://img.shields.io/badge/Node.js-20-339933?logo=nodedotjs&logoColor=white)
+
+> **QA Automation portfolio.** Cross-browser E2E and API test suite for a live web app —
+> Page Object Model design, three rendering engines, API smoke checks, CI on every push,
+> and Allure reporting. Built to demonstrate test *strategy and maintainability*, not just
+> green checkmarks.
 
 End-to-end and API test automation for the [Dutch-English Phrase Game](https://dutch-english-phrase-game.netlify.app/),
 a small browser game that quizzes the player on Dutch phrases. The tests run against the
@@ -163,7 +173,10 @@ viewport and matching video size are fixed so traces and recordings are consiste
 
 ## CI/CD
 
-`.github/workflows/playwright.yml` runs on push/PR to `master` as **two parallel jobs**:
+Every push and pull request to `master` automatically runs the full suite on GitHub's
+servers — no manual steps, results visible on every commit (the badge at the top reflects the
+latest run). The workflow (`.github/workflows/playwright.yml`) splits into **two jobs that run
+in parallel** for speed:
 
 - **API (pytest)** — Python 3.10, `RUN_API_TESTS=1`, uploads a self-contained HTML report.
 - **UI (Playwright)** — Node 20, installs browsers, **waits for the Netlify deploy**, runs all
